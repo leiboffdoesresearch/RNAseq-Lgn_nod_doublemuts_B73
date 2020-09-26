@@ -1,0 +1,65 @@
+configfile: "config.yaml"
+
+container: "docker://continuumio/miniconda3:4.4.10"
+
+rule all:
+    input:
+        expand('{sample}.txt', sample=config["samples"])
+
+rule fastp:
+    input:
+        #some read files
+    output:
+        #trimmed reads
+        #html report
+        #json report
+    conda:
+        "envs/fastp.yaml"
+    threads: 10 #how many?
+    shell: 
+        "fastp -w {threads} \ "
+        "-i ./compressed_reads/{STEM}_L001_R1_001.fastq.gz \ "
+        "-I ./compressed_reads/{STEM}_L001_R1_001.fastq.gz \ "
+        "-o ./trimmed_reads/{STEM}.fastq.gz \ "
+        "-O ./trimmed_reads/{STEM}.fastq.gz \ "
+        "-h ./fastp_report/{STEM}.html -j ./fastp_report/{STEM}.json \ "
+        "-R {STEM} fastp report"
+
+rule hisat2:
+    input:
+        #trimmed reads
+        #genome index
+    output:
+        #aligned reads
+        #text summary
+    conda:
+        "envs/hisat2.yaml"
+    threads: 4 # how many?
+    params: 
+        min_i = #min intronlen
+        max_i = #max intronlen
+    shell:
+        "hisat2 --min-intronlen 60 --max-intronlen 50000 -p 4 \ "
+        "-x ./maize_genome/ZmaysAGPv3.30.hisat2 \ "
+        "-U ./trimmed_reads/"${STEM}".fastq.gz \ "
+        "2> ./HiSAT2_report/"${STEM}"_summary.txt \ "
+        "| samtools view -bS - \ "
+        "> ./aligned_reads/"${STEM}".bam"
+
+rule featureCounts_unionExon:
+    input:
+        #bam reads
+        #annotation gtf
+        #count_by
+        #summarize_by
+    output:
+        #counts.txt
+    conda:
+        "envs/subread.yaml"
+    threads: 4 # how many?
+    shell:
+        "featureCounts -T 4 \ "
+        "-a ./maize_genome/Zea_mays.AGPv3.30.repaired.gtf \ "
+        "-t exon -g gene_id \ "
+        "-o ./featureCounts/${STEM}.txt \ "
+        "./aligned_reads/${STEM}.bam"

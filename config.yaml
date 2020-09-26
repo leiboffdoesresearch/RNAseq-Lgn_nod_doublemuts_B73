@@ -1,0 +1,7 @@
+samples:
+  # some sort of structure
+
+hisat_params:
+  min_i = 60
+  max_i = 50000
+  #min intron 60 max intron 50000 from Chen et al. 2018
