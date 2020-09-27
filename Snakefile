@@ -54,8 +54,8 @@ rule hisat2:
         "-p {threads} "
         "-x {params.genome} "
         "-1 {input.R1} -2 {input.R2} "
-        "| samtools view -Sbh -o {output.bam} -) "
-        "{log}"
+        "| samtools view -Sbh -o {output.bam} - ) "
+        "2> {log}"
 
 #Union-Exon RNA alignment counting
 rule featureCounts_unionExon:
