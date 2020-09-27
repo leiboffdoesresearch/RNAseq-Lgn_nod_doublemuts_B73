@@ -39,7 +39,7 @@ rule hisat2:
         R1 = 'trimmed_reads/{sample}_R1.fastq.gz',
         R2 = 'trimmed_reads/{sample}_R2.fastq.gz'
     output:
-        bam = 'aligned_reads/{sample}.bam'
+        bam = 'aligned_reads/{sample}.bam',
         report = "hisat2_report/{sample}_log.txt"
     conda:
         "envs/hisat2.yaml"
