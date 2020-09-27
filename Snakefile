@@ -5,7 +5,7 @@ configfile: "config.yaml"
 
 #use minimal debian containerized environment with conda
 #useful for OS standardization
-container: "docker://continuumio/miniconda3:4.4.10"
+container: "docker://continuumio/miniconda3:4.7.10"
 
 #this rule looks for all the final files
 #drives the back propagation of all intermediate rules
