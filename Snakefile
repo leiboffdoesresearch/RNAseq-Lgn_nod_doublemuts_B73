@@ -39,7 +39,7 @@ rule hisat2:
         R1 = 'trimmed_reads/{sample}_R1.fastq.gz',
         R2 = 'trimmed_reads/{sample}_R2.fastq.gz'
     output:
-        bam = 'aligned_reads/{sample}.bam'
+        SAM = pipe('aligned_reads/{sample}.sam')
     conda:
         "envs/hisat2.yaml"
     threads: 4 # how many?
@@ -55,7 +55,15 @@ rule hisat2:
         "-x {params.genome} "
         "-1 {input.R1} -2 {input.R2} "
         "--summary-file {log} "
-        "| samtools view -Sbh -o {output.bam} -"
+        "-S {output.SAM}"
+
+rule SAM_to_BAM:
+    input:
+        SAM = 'aligned_reads/{sample}.sam'
+    output:
+        BAM = 'aligned_reads/{sample}.bam'
+    shell:
+        "samtools view -bh -o {output.BAM} {input.SAM}"
 
 #Union-Exon RNA alignment counting
 rule featureCounts_unionExon:
