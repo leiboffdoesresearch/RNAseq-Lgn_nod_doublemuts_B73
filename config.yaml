@@ -1,8 +1,22 @@
 samples:
-  samples = []
+  ["DM1",
+  "DM2",
+  "DM4",
+  "Lgn1",
+  "Lgn3",
+  "nod2",
+  "nod3",
+  "nod4",
+  "wt1",
+  "wt2",
+  "wt4"] 
   # some sort of structure
 
 hisat_params:
-  min_i = 60
-  max_i = 50000
+  min_i: 60
+  max_i: 50000
   #min intron 60 max intron 50000 from Chen et al. 2018
+
+genome_info:
+  genome: "maize_genome/ZmaysAGPv3.30.hisat2"
+  gtf: "maize_genome/Zea_mays.AGPv3.30.repaired.gtf"

@@ -4,41 +4,39 @@ container: "docker://continuumio/miniconda3:4.4.10"
 
 rule all:
     input:
-        expand('./featureCounts/{sample}.txt', sample=config["samples"])
+        expand('featureCounts/{sample}.txt', sample=config["samples"])
 
 rule fastp:
     input:
-        R1 = './compressed_reads/{sample}_R1.fastq.gz'
-        R2 = './compressed_reads/{sample}_R2.fastq.gz'
-        sample = '{sample}'
+        R1 = 'compressed_reads/{sample}_R1.fastq.gz',
+        R2 = 'compressed_reads/{sample}_R2.fastq.gz',
     output:
-        R1 = './trimmed_reads/{sample}_R1.fastq.gz'
-        R2 = './trimmed_reads/{sample}_R2.fastq.gz'
-        html_report = './fastp_report/{sample}.html'
-        json_report = './fastp_report/{sample}.json'
+        R1 = 'trimmed_reads/{sample}_R1.fastq.gz',
+        R2 = 'trimmed_reads/{sample}_R2.fastq.gz',
+        html_report = 'fastp_report/{sample}.html',
+        json_report = 'fastp_report/{sample}.json'
     conda:
         "envs/fastp.yaml"
     threads: 4 #how many?
     shell: 
         "fastp -w {threads} \ "
         "-i {input.R1} -I {input.R2} \ "
-        "-o {input.R1} -O {input.R2} \ "
-        "-h {output.html_report} -j {output.json_report} \ "
-        "-R {input.sample} fastp report"
+        "-o {output.R1} -O {output.R2} \ "
+        "-h {output.html_report} -j {output.json_report}"
 
 rule hisat2:
     input:
-        R1 = './trimmed_reads/{sample}_R1.fastq.gz'
-        R2 = './trimmed_reads/{sample}_R2.fastq.gz'
-        genome = '{genome}' #genome index
+        R1 = 'trimmed_reads/{sample}_R1.fastq.gz',
+        R2 = 'trimmed_reads/{sample}_R2.fastq.gz',
+        genome = config["genome_info"]["genome"] #genome index
     output:
-        bam = './aligned_reads/{sample}.bam'
-        rep = './hisat_report/{sample}_summary.txt'
+        bam = 'aligned_reads/{sample}.bam',
+        rep = 'hisat_report/{sample}_summary.txt'
     conda:
         "envs/hisat2.yaml"
     threads: 4 # how many?
     params: 
-        min_i = config["hisat_params"]["min_i"] #min intronlen
+        min_i = config["hisat_params"]["min_i"], #min intronlen
         max_i = config["hisat_params"]["max_i"] #max intronlen
     shell:
         "hisat2 --min-intronlen {params.min_i} --max-intronlen {params.max_i} \ "
@@ -50,12 +48,12 @@ rule hisat2:
 
 rule featureCounts_unionExon:
     input:
-        bam = './aligned_reads/{sample}.bam'
-        anno = '{gtf}'
+        bam = 'aligned_reads/{sample}.bam',
+        anno = config["genome_info"]["gtf"]
         #count_by
         #summarize_by
     output:
-        './featureCounts/{sample}.txt'
+        'featureCounts/{sample}.txt'
     conda:
         "envs/subread.yaml"
     threads: 4 # how many?
