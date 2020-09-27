@@ -1,11 +1,20 @@
+#load info from config file
+#config file contains sample name info, genome file info, and hisat parameters
+#consider adding featureCounts summary factors as config parameters
 configfile: "config.yaml"
 
+#use minimal debian containerized environment with conda
+#useful for OS standardization
 container: "docker://continuumio/miniconda3:4.4.10"
 
+#this rule looks for all the final files
+#drives the back propagation of all intermediate rules
+#elimintates the need for specifying inputs or outputs on command line
 rule all:
     input:
         expand('featureCounts/{sample}.txt', sample=config["samples"])
 
+#fastp in paired-end mode
 rule fastp:
     input:
         R1 = 'compressed_reads/{sample}_R1.fastq.gz',
@@ -24,6 +33,7 @@ rule fastp:
         "-o {output.R1} -O {output.R2} \ "
         "-h {output.html_report} -j {output.json_report}"
 
+#hisat2 in paired end mode
 rule hisat2:
     input:
         R1 = 'trimmed_reads/{sample}_R1.fastq.gz',
@@ -46,6 +56,7 @@ rule hisat2:
         "2> {output.rep} | samtools view -bS - \ "
         "> {output.bam}"
 
+#Union-Exon RNA alignment counting
 rule featureCounts_unionExon:
     input:
         bam = 'aligned_reads/{sample}.bam',
