@@ -46,6 +46,8 @@ rule hisat2:
     conda:
         "envs/hisat2.yaml"
     threads: 4 # how many?
+    log:                                # optional
+        "hisat2_report/{sample}_log.txt"
     params: 
         genome = config["genome_info"]["genome"], #genome index
         min_i = config["hisat_params"]["min_i"], #min intronlen
