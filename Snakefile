@@ -50,12 +50,12 @@ rule hisat2:
         min_i = config["hisat_params"]["min_i"], #min intronlen
         max_i = config["hisat_params"]["max_i"] #max intronlen
     shell:
-        "(hisat2 --min-intronlen {params.min_i} --max-intronlen {params.max_i} "
+        "hisat2 --min-intronlen {params.min_i} --max-intronlen {params.max_i} "
         "-p {threads} "
         "-x {params.genome} "
         "-1 {input.R1} -2 {input.R2} "
-        "| samtools view -Sbh -o {output.bam} - ) "
-        "2> {log}"
+        "--summary-file {log} "
+        "| samtools view -Sbh -o {output.bam} -"
 
 #Union-Exon RNA alignment counting
 rule featureCounts_unionExon:
