@@ -62,6 +62,8 @@ rule SAM_to_BAM:
         SAM = 'aligned_reads/{sample}.sam'
     output:
         BAM = 'aligned_reads/{sample}.bam'
+    conda:
+        "envs/hisat2.yaml"
     shell:
         "samtools view -bh -o {output.BAM} {input.SAM}"
 
