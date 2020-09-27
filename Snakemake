@@ -4,62 +4,64 @@ container: "docker://continuumio/miniconda3:4.4.10"
 
 rule all:
     input:
-        expand('{sample}.txt', sample=config["samples"])
+        expand('./featureCounts/{sample}.txt', sample=config["samples"])
 
 rule fastp:
     input:
-        #some read files
+        R1 = './compressed_reads/{sample}_R1.fastq.gz'
+        R2 = './compressed_reads/{sample}_R2.fastq.gz'
+        sample = '{sample}'
     output:
-        #trimmed reads
-        #html report
-        #json report
+        R1 = './trimmed_reads/{sample}_R1.fastq.gz'
+        R2 = './trimmed_reads/{sample}_R2.fastq.gz'
+        html_report = './fastp_report/{sample}.html'
+        json_report = './fastp_report/{sample}.json'
     conda:
         "envs/fastp.yaml"
-    threads: 10 #how many?
+    threads: 4 #how many?
     shell: 
         "fastp -w {threads} \ "
-        "-i ./compressed_reads/{STEM}_L001_R1_001.fastq.gz \ "
-        "-I ./compressed_reads/{STEM}_L001_R1_001.fastq.gz \ "
-        "-o ./trimmed_reads/{STEM}.fastq.gz \ "
-        "-O ./trimmed_reads/{STEM}.fastq.gz \ "
-        "-h ./fastp_report/{STEM}.html -j ./fastp_report/{STEM}.json \ "
-        "-R {STEM} fastp report"
+        "-i {input.R1} -I {input.R2} \ "
+        "-o {input.R1} -O {input.R2} \ "
+        "-h {output.html_report} -j {output.json_report} \ "
+        "-R {input.sample} fastp report"
 
 rule hisat2:
     input:
-        #trimmed reads
-        #genome index
+        R1 = './trimmed_reads/{sample}_R1.fastq.gz'
+        R2 = './trimmed_reads/{sample}_R2.fastq.gz'
+        genome = '{genome}' #genome index
     output:
-        #aligned reads
-        #text summary
+        bam = './aligned_reads/{sample}.bam'
+        rep = './hisat_report/{sample}_summary.txt'
     conda:
         "envs/hisat2.yaml"
     threads: 4 # how many?
     params: 
-        min_i = #min intronlen
-        max_i = #max intronlen
+        min_i = config["hisat_params"]["min_i"] #min intronlen
+        max_i = config["hisat_params"]["max_i"] #max intronlen
     shell:
-        "hisat2 --min-intronlen 60 --max-intronlen 50000 -p 4 \ "
-        "-x ./maize_genome/ZmaysAGPv3.30.hisat2 \ "
-        "-U ./trimmed_reads/"${STEM}".fastq.gz \ "
-        "2> ./HiSAT2_report/"${STEM}"_summary.txt \ "
-        "| samtools view -bS - \ "
-        "> ./aligned_reads/"${STEM}".bam"
+        "hisat2 --min-intronlen {params.min_i} --max-intronlen {params.max_i} \ "
+        "-p {threads} \ "
+        "-x {input.genome} \ "
+        "-1 {input.R1} -2 {input.R2} \ "
+        "2> {output.rep} | samtools view -bS - \ "
+        "> {output.bam}"
 
 rule featureCounts_unionExon:
     input:
-        #bam reads
-        #annotation gtf
+        bam = './aligned_reads/{sample}.bam'
+        anno = '{gtf}'
         #count_by
         #summarize_by
     output:
-        #counts.txt
+        './featureCounts/{sample}.txt'
     conda:
         "envs/subread.yaml"
     threads: 4 # how many?
     shell:
-        "featureCounts -T 4 \ "
-        "-a ./maize_genome/Zea_mays.AGPv3.30.repaired.gtf \ "
+        "featureCounts -T {threads} \ "
+        "-a '{input.anno}' \ "
         "-t exon -g gene_id \ "
-        "-o ./featureCounts/${STEM}.txt \ "
-        "./aligned_reads/${STEM}.bam"
+        "-o {output} \ "
+        "{input.bam}"
