@@ -28,33 +28,35 @@ rule fastp:
         "envs/fastp.yaml"
     threads: 4 #how many?
     shell: 
-        "fastp -w {threads} \ "
-        "-i {input.R1} -I {input.R2} \ "
-        "-o {output.R1} -O {output.R2} \ "
+        "fastp -w {threads} "
+        "-i {input.R1} -I {input.R2} "
+        "-o {output.R1} -O {output.R2} "
         "-h {output.html_report} -j {output.json_report}"
 
 #hisat2 in paired end mode
+from snakemake.shell import shell
+# Run log
+log = snakemake.log_fmt_shell()
 rule hisat2:
     input:
         R1 = 'trimmed_reads/{sample}_R1.fastq.gz',
-        R2 = 'trimmed_reads/{sample}_R2.fastq.gz',
+        R2 = 'trimmed_reads/{sample}_R2.fastq.gz'
     output:
-        bam = 'aligned_reads/{sample}.bam',
-        rep = 'hisat_report/{sample}_summary.txt'
+        bam = 'aligned_reads/{sample}.bam'
     conda:
         "envs/hisat2.yaml"
     threads: 4 # how many?
     params: 
-        genome = config["genome_info"]["genome"] #genome index
+        genome = config["genome_info"]["genome"], #genome index
         min_i = config["hisat_params"]["min_i"], #min intronlen
         max_i = config["hisat_params"]["max_i"] #max intronlen
     shell:
-        "hisat2 --min-intronlen {params.min_i} --max-intronlen {params.max_i} \ "
-        "-p {threads} \ "
-        "-x {params.genome} \ "
-        "-1 {input.R1} -2 {input.R2} \ "
-        "2> {output.rep} | samtools view -bS - \ "
-        "> {output.bam}"
+        "(hisat2 --min-intronlen {params.min_i} --max-intronlen {params.max_i} "
+        "-p {threads} "
+        "-x {params.genome} "
+        "-1 {input.R1} -2 {input.R2} "
+        "| samtools view -Sbh -o {output.bam} -) "
+        "{log}"
 
 #Union-Exon RNA alignment counting
 rule featureCounts_unionExon:
@@ -69,8 +71,8 @@ rule featureCounts_unionExon:
         "envs/subread.yaml"
     threads: 4 # how many?
     shell:
-        "featureCounts -T {threads} \ "
-        "-a '{input.anno}' \ "
-        "-t exon -g gene_id \ "
-        "-o {output} \ "
+        "featureCounts -T {threads} "
+        "-a '{input.anno}' "
+        "-t exon -g gene_id "
+        "-o {output} "
         "{input.bam}"
