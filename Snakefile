@@ -5,7 +5,7 @@ configfile: "config.yaml"
 
 #use minimal debian containerized environment with conda
 #useful for OS standardization
-container: "docker://continuumio/miniconda3:4.8.2"
+container: "docker://snakemake/snakemake:v5.23.0"
 
 #this rule looks for all the final files
 #drives the back propagation of all intermediate rules
