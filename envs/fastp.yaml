@@ -1,5 +1,5 @@
 channels:
- - conda-forge
- - bioconda
+  - conda-forge
+  - bioconda
 dependencies:
- - fastp=0.20.1
+  - fastp=0.20.1

@@ -1,6 +1,6 @@
 channels:
- - conda-forge
- - bioconda
+  - conda-forge
+  - bioconda
 dependencies:
- - hisat2=2.2.1
- - samtools=1.10
+  - hisat2=2.2.1
+  - samtools=1.10
