@@ -34,9 +34,6 @@ rule fastp:
         "-h {output.html_report} -j {output.json_report}"
 
 #hisat2 in paired end mode
-from snakemake.shell import shell
-# Run log
-log = snakemake.log_fmt_shell()
 rule hisat2:
     input:
         R1 = 'trimmed_reads/{sample}_R1.fastq.gz',
