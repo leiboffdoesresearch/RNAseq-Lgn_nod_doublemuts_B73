@@ -7,10 +7,6 @@ configfile: "config.yaml"
 #useful for OS standardization
 container: "docker://snakemake/snakemake:v5.23.0"
 
-#a shameful place for unsetting problematic varaibles
-shell:
-    "unset PERL5LIB"
-
 #this rule looks for all the final files
 #drives the back propagation of all intermediate rules
 #elimintates the need for specifying inputs or outputs on command line
