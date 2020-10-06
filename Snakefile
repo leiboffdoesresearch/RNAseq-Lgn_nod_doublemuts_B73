@@ -49,6 +49,7 @@ rule hisat2:
         min_i = config["hisat_params"]["min_i"], #min intronlen
         max_i = config["hisat_params"]["max_i"] #max intronlen
     shell:
+        "PERL5LIB=/quobyte/Leiboff_Lab/Lgn_nod_RNAseq/.snakemake/conda/f58acdc0/lib/5.30.3/Perl; "
         "hisat2 --min-intronlen {params.min_i} --max-intronlen {params.max_i} "
         "-p {threads} "
         "-x {params.genome} "
