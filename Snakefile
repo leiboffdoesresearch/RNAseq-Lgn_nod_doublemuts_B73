@@ -58,6 +58,7 @@ rule hisat2:
         "| samtools view -Sb -F 4 -o {output.bam}"
 
 #Union-Exon RNA alignment counting
+#Paired end, option -p
 rule featureCounts_unionExon:
     input:
         bam = 'aligned_reads/{sample}.bam',
@@ -74,4 +75,4 @@ rule featureCounts_unionExon:
         "-a '{input.anno}' "
         "-t exon -g gene_id "
         "-o {output} "
-        "{input.bam}"
+        "-p {input.bam}"
